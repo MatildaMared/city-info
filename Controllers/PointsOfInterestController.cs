@@ -14,19 +14,27 @@ public class PointsOfInterestController : ControllerBase
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-    
+
     [HttpGet]
     public ActionResult<IEnumerable<PointOfInterestDto>> GetPointsOfInterest(int cityId)
     {
-        var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-
-        if (city == null)
+        try
         {
-            _logger.LogInformation("City with id {CityId} wasn't found when accessing points of interests", cityId);
-            return NotFound();
-        }
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-        return Ok(city.PointsOfInterest);
+            if (city == null)
+            {
+                _logger.LogInformation("City with id {CityId} wasn't found when accessing points of interests", cityId);
+                return NotFound();
+            }
+
+            return Ok(city.PointsOfInterest);
+        }
+        catch (Exception e)
+        {
+            _logger.LogCritical($"Exception while getting point of interests for city with id {cityId}.", e);
+            return StatusCode(500, "A problem occured while handling your request");
+        }
     }
 
     [HttpGet("{pointOfInterestId}", Name = "GetPointOfInterest")]
@@ -53,7 +61,6 @@ public class PointsOfInterestController : ControllerBase
     public ActionResult<PointOfInterestDto> CreatePointOfInterest(int cityId,
         PointOfInterestForCreationDto pointOfInterest)
     {
-
         var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
         if (city == null)
         {
@@ -72,10 +79,10 @@ public class PointsOfInterestController : ControllerBase
         city.PointsOfInterest.Add(finalPointOfInterest);
 
         return CreatedAtRoute("GetPointOfInterest", new
-        {
-            cityId = cityId,
-            pointOfInterestId = finalPointOfInterest.Id
-        },
+            {
+                cityId = cityId,
+                pointOfInterestId = finalPointOfInterest.Id
+            },
             finalPointOfInterest);
     }
 
@@ -88,7 +95,7 @@ public class PointsOfInterestController : ControllerBase
         {
             return NotFound();
         }
-        
+
         var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
         {
@@ -110,7 +117,7 @@ public class PointsOfInterestController : ControllerBase
         {
             return NotFound();
         }
-        
+
         var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
         {
@@ -122,7 +129,7 @@ public class PointsOfInterestController : ControllerBase
             Name = pointOfInterestFromStore.Name,
             Description = pointOfInterestFromStore.Description
         };
-        
+
         patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
 
         if (!ModelState.IsValid)
@@ -149,7 +156,7 @@ public class PointsOfInterestController : ControllerBase
         {
             return NotFound();
         }
-        
+
         var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
         {
