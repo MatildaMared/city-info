@@ -2,8 +2,14 @@ namespace CityInfo.Services;
 
 public class CloudMailService : IMailService
 {
-    private string _mailto = "admin@company.com";
-    private string _mailFrom = "noreply@company.com";
+    private readonly string _mailto = string.Empty;
+    private readonly string _mailFrom = string.Empty;
+
+    public CloudMailService(IConfiguration configuration)
+    {
+        _mailto = configuration["mailSettings:mailToAddress"];
+        _mailFrom = configuration["mailSettings:mailFromAddress"];
+    }
 
     public void Send(string subject, string message)
     {
