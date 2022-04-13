@@ -1,4 +1,5 @@
 using CityInfo;
+using CityInfo.DbContexts;
 using CityInfo.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Serilog;
@@ -33,6 +34,8 @@ builder.Services.AddTransient<IMailService, CloudMailService>();
 #endif
 
 builder.Services.AddSingleton<CitiesDataStore>();
+
+builder.Services.AddDbContext<CityInfoContext>();
 
 var app = builder.Build();
 
