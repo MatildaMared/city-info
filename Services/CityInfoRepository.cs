@@ -12,6 +12,11 @@ public class CityInfoRepository : ICityInfoRepository
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
+
+    public async Task<bool> CityExistsAsync(int cityId)
+    {
+        return await _context.Cities.AnyAsync(c => c.Id == cityId);
+    }
     
     // Returns all cities. Async method, cities ordered by name
     public async Task<IEnumerable<City>> GetCitiesAsync()
