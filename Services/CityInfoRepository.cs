@@ -17,7 +17,7 @@ public class CityInfoRepository : ICityInfoRepository
     {
         return await _context.Cities.AnyAsync(c => c.Id == cityId);
     }
-    
+
     // Returns all cities. Async method, cities ordered by name
     public async Task<IEnumerable<City>> GetCitiesAsync()
     {
@@ -25,13 +25,8 @@ public class CityInfoRepository : ICityInfoRepository
     }
 
     // Returns all cities that matches the name parameter that is sent in a query string in the http request
-    public async Task<IEnumerable<City>> GetCitiesAsync(string? name, string? searchQuery)
+    public async Task<(IEnumerable<City>, PaginationMetadata)> GetCitiesAsync(string? name, string? searchQuery, int pageNumber, int pageSize)
     {
-        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(searchQuery))
-        {
-            return await GetCitiesAsync();
-        }
-        
         // collection to start from
         var collection = _context.Cities as IQueryable<City>;
 
@@ -48,7 +43,13 @@ public class CityInfoRepository : ICityInfoRepository
                 a.Name.Contains(searchQuery) || (a.Description != null && a.Description.Contains(searchQuery)));
         }
 
-        return await collection.OrderBy(c => c.Name).ToListAsync();
+        var totalItemCount = await collection.CountAsync();
+
+        var paginationMetadata = new PaginationMetadata(totalItemCount, pageSize, pageNumber);
+
+        var collectionToReturn = await collection.OrderBy(c => c.Name).Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToListAsync();
+
+        return (collectionToReturn, paginationMetadata);
     }
 
     // Returns a single city. A boolean decides if to include points of interests or not
