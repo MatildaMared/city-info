@@ -1,12 +1,14 @@
 using AutoMapper;
 using CityInfo.Models;
 using CityInfo.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.Controllers;
 
 [Route("/api/cities/{cityId}/pointsofinterest")]
+[Authorize]
 [ApiController]
 public class PointsOfInterestController : ControllerBase
 {
