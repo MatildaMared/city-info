@@ -24,6 +24,18 @@ public class CityInfoRepository : ICityInfoRepository
         return await _context.Cities.OrderBy(c => c.Name).ToListAsync();
     }
 
+    // Returns all cities that matches the name parameter that is sent in a query string in the http request
+    public async Task<IEnumerable<City>> GetCitiesAsync(string? name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return await GetCitiesAsync();
+        }
+
+        name = name.Trim();
+        return await _context.Cities.Where(c => c.Name == name).OrderBy(c => c.Name).ToListAsync();
+    }
+
     // Returns a single city. A boolean decides if to include points of interests or not
     public async Task<City?> GetCityAsync(int cityId, bool includePointsOfInterest)
     {
